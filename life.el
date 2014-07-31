@@ -1,8 +1,4 @@
 
-(defun assertEqual (exp val)
-  (equal exp val))
-
-
 (defun alive (world cell)
   (not (null (gethash cell world))))
 
@@ -41,7 +37,7 @@
     (if w w (random))))
 
 (defun new-cell (x y)
-  '(pos (cons x y) age 0)
+  '(pos (cons x y) age 0))
 
 (defun new-world (cells)
   (let ((world (make-hash-table :test 'equal)))
@@ -58,6 +54,24 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; tests
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun assertEqual (exp val)
+  (equal exp val))
+
+(defun assertEqualM (expected act)
+  (let ((actual (unwind-protect
+                    (condition-case err
+                        (act)
+                      ('error (message (format "Caught exception: [%s]" ex)))))))
+                      ;;('error (concat "%s" (error-message-string err)))))))
+    (if (equal actual expected)
+        t
+      (concat "Expected: " expected " actual was: " actual " for expression " act))))
+
+  (assertEqualM 0 (neighbours (new-world '())
+                              (new-cell 1 1)))
+
+
 
 ;; test neighbours
 (progn
