@@ -3,7 +3,7 @@
   (not (null (gethash cell world))))
 
 (defun alive2 (world x y)
-  (alive world (cons x y)))
+  (alive world (new-cell x y)))
 
 ;; return number of alive neighbours
 (defun neighbours (world cell)
@@ -37,7 +37,7 @@
     (if w w (random))))
 
 (defun new-cell (x y)
-  '(pos (cons x y) age 0))
+  `(pos ,(cons x y) age 0))
 
 (defun new-world (cells)
   (let ((world (make-hash-table :test 'equal)))
@@ -55,29 +55,36 @@
 ;; tests
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defun assertEqual (exp val)
-  (equal exp val))
+(defmacro assertEqualMC (expected expr)
+  `(let ((actual (condition-case ex
+                     ,expr
+                   ('error (message (format "Caught exception: [%s]" ex))))))
+     (if (equal actual ,expected)
+         t
+       (message "Expected: '%s' Actual: '%s' Expression: '%s'"
+                ,expected actual (prin1-to-string ',expr)))))
 
-(defun assertEqualM (expected act)
-  (let ((actual (unwind-protect
-                    (condition-case err
-                        (act)
-                      ('error (message (format "Caught exception: [%s]" ex)))))))
-                      ;;('error (concat "%s" (error-message-string err)))))))
-    (if (equal actual expected)
-        t
-      (concat "Expected: " expected " actual was: " actual " for expression " act))))
+(defmacro assertEqual (expected expr)
+  `(let ((actual ,expr))
+     (if (equal actual ,expected)
+         t
+       (message "Expected: '%s' Actual: '%s' Expression: '%s'"
+                ,expected actual (prin1-to-string ',expr)))))
 
-  (assertEqualM 0 (neighbours (new-world '())
-                              (new-cell 1 1)))
+(macroexpand
+ ' (assertEqual 0
+                (neighbours (new-world '())
+                            (new-cell 1 1)))
+ )
 
-
+(assertEqual 1
+             (/ 1 1))
 
 ;; test neighbours
 (progn
   (assertEqual 0 (neighbours (new-world '())
                              (new-cell 1 1)))
-  (assertEqual 1 (neighbours (new-world (list (cons 0 1)))
+  (assertEqual 1 (neighbours (new-world (list (new-cell 0 1)))
                              (new-cell 1 1)))
   (assertEqual 2 (neighbours (new-world (list (new-cell 1 1)
                                               (new-cell 2 1)
@@ -87,19 +94,31 @@
                                               (new-cell 2 1)
                                               (new-cell 3 1)))
                              (new-cell 1 1)))
+  (assertEqual 4 (neighbours (new-world (list (new-cell 1 1)
+                                              (new-cell 3 1)
+                                              (new-cell 1 3)
+                                              (new-cell 3 3)))
+                             (new-cell 2 2)))
+  (assertEqual 6 (neighbours (new-world (list (new-cell 1 1)
+                                              (new-cell 2 1)
+                                              (new-cell 3 1)
+                                              (new-cell 1 3)
+                                              (new-cell 2 3)
+                                              (new-cell 3 3)))
+                             (new-cell 2 2)))
   )
 
 ;; test alive
 (progn
   (assertEqual nil
                (alive (new-world '())
-                      (cons 0 0)))
+                      (new-cell 0 0)))
   (assertEqual t
-               (alive (new-world (list (cons 0 0)))
-                      (cons 0 0)))
+               (alive (new-world (list (new-cell 0 0)))
+                      (new-cell 0 0)))
   (assertEqual nil
-               (alive (new-world (list (cons 0 0)))
-                      (cons 1 1)))
+               (alive (new-world (list (new-cell 0 0)))
+                      (new-cell 1 1)))
   )
 
 ;; test survives
