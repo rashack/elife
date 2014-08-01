@@ -3,7 +3,7 @@
   (not (null (gethash cell world))))
 
 (defun alive2 (world x y)
-  (alive world (new-cell x y)))
+  (alive world (cell-new x y)))
 
 ;; return number of alive neighbours
 (defun neighbours (world cell)
@@ -36,7 +36,7 @@
   (let ((w (plist-get cell 'weight)))
     (if w w (random))))
 
-(defun new-cell (x y)
+(defun cell-new (x y)
   `(pos ,(cons x y) age 0))
 
 (defun new-world (cells)
@@ -74,7 +74,7 @@
 (macroexpand
  ' (assertEqual 0
                 (neighbours (new-world '())
-                            (new-cell 1 1)))
+                            (cell-new 1 1)))
  )
 
 (assertEqual 1
@@ -83,53 +83,53 @@
 ;; test neighbours
 (progn
   (assertEqual 0 (neighbours (new-world '())
-                             (new-cell 1 1)))
-  (assertEqual 1 (neighbours (new-world (list (new-cell 0 1)))
-                             (new-cell 1 1)))
-  (assertEqual 2 (neighbours (new-world (list (new-cell 1 1)
-                                              (new-cell 2 1)
-                                              (new-cell 3 1)))
-                             (new-cell 2 1)))
-  (assertEqual 1 (neighbours (new-world (list (new-cell 1 1)
-                                              (new-cell 2 1)
-                                              (new-cell 3 1)))
-                             (new-cell 1 1)))
-  (assertEqual 4 (neighbours (new-world (list (new-cell 1 1)
-                                              (new-cell 3 1)
-                                              (new-cell 1 3)
-                                              (new-cell 3 3)))
-                             (new-cell 2 2)))
-  (assertEqual 6 (neighbours (new-world (list (new-cell 1 1)
-                                              (new-cell 2 1)
-                                              (new-cell 3 1)
-                                              (new-cell 1 3)
-                                              (new-cell 2 3)
-                                              (new-cell 3 3)))
-                             (new-cell 2 2)))
+                             (cell-new 1 1)))
+  (assertEqual 1 (neighbours (new-world (list (cell-new 0 1)))
+                             (cell-new 1 1)))
+  (assertEqual 2 (neighbours (new-world (list (cell-new 1 1)
+                                              (cell-new 2 1)
+                                              (cell-new 3 1)))
+                             (cell-new 2 1)))
+  (assertEqual 1 (neighbours (new-world (list (cell-new 1 1)
+                                              (cell-new 2 1)
+                                              (cell-new 3 1)))
+                             (cell-new 1 1)))
+  (assertEqual 4 (neighbours (new-world (list (cell-new 1 1)
+                                              (cell-new 3 1)
+                                              (cell-new 1 3)
+                                              (cell-new 3 3)))
+                             (cell-new 2 2)))
+  (assertEqual 6 (neighbours (new-world (list (cell-new 1 1)
+                                              (cell-new 2 1)
+                                              (cell-new 3 1)
+                                              (cell-new 1 3)
+                                              (cell-new 2 3)
+                                              (cell-new 3 3)))
+                             (cell-new 2 2)))
   )
 
 ;; test alive
 (progn
   (assertEqual nil
                (alive (new-world '())
-                      (new-cell 0 0)))
+                      (cell-new 0 0)))
   (assertEqual t
-               (alive (new-world (list (new-cell 0 0)))
-                      (new-cell 0 0)))
+               (alive (new-world (list (cell-new 0 0)))
+                      (cell-new 0 0)))
   (assertEqual nil
-               (alive (new-world (list (new-cell 0 0)))
-                      (new-cell 1 1)))
+               (alive (new-world (list (cell-new 0 0)))
+                      (cell-new 1 1)))
   )
 
 ;; test survives
 (progn
   (assertEqual t
-               (survives (new-world (list (new-cell 1 1)
-                                          (new-cell 2 1)
-                                          (new-cell 3 1)))
-                         (new-cell 2 1)))
+               (survives (new-world (list (cell-new 1 1)
+                                          (cell-new 2 1)
+                                          (cell-new 3 1)))
+                         (cell-new 2 1)))
   (assertEqual nil
-               (survives (new-world (list (new-cell 1 1)
-                                          (new-cell 2 1)))
-                         (new-cell 2 1)))
+               (survives (new-world (list (cell-new 1 1)
+                                          (cell-new 2 1)))
+                         (cell-new 2 1)))
   )
