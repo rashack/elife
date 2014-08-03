@@ -55,15 +55,6 @@
 ;; tests
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmacro assertEqualMC (expected expr)
-  `(let ((actual (condition-case ex
-                     ,expr
-                   ('error (message (format "Caught exception: [%s]" ex))))))
-     (if (equal actual ,expected)
-         t
-       (message "Expected: '%s' Actual: '%s' Expression: '%s'"
-                ,expected actual (prin1-to-string ',expr)))))
-
 (defmacro assertEqual (expected expr)
   `(let ((actual ,expr))
      (if (equal actual ,expected)
@@ -71,65 +62,61 @@
        (message "Expected: '%s' Actual: '%s' Expression: '%s'"
                 ,expected actual (prin1-to-string ',expr)))))
 
-(macroexpand
- ' (assertEqual 0
-                (neighbours (new-world '())
-                            (cell-new 1 1)))
- )
-
-(assertEqual 1
-             (/ 1 1))
+(defun test-many (funs)
+  (let* ((res (mapcar 'eval funs))
+         (failed (filter (lambda (r) (not (equal t r)))
+                         res)))
+    (if (null failed)
+        (format "All %d tests succeeded" (length res))
+      (format "%d of %d tests failed: %s" (length failed) (length res) failed))))
 
 ;; test neighbours
-(progn
-  (assertEqual 0 (neighbours (new-world '())
-                             (cell-new 1 1)))
-  (assertEqual 1 (neighbours (new-world (list (cell-new 0 1)))
-                             (cell-new 1 1)))
-  (assertEqual 2 (neighbours (new-world (list (cell-new 1 1)
-                                              (cell-new 2 1)
-                                              (cell-new 3 1)))
-                             (cell-new 2 1)))
-  (assertEqual 1 (neighbours (new-world (list (cell-new 1 1)
-                                              (cell-new 2 1)
-                                              (cell-new 3 1)))
-                             (cell-new 1 1)))
-  (assertEqual 4 (neighbours (new-world (list (cell-new 1 1)
-                                              (cell-new 3 1)
-                                              (cell-new 1 3)
-                                              (cell-new 3 3)))
-                             (cell-new 2 2)))
-  (assertEqual 6 (neighbours (new-world (list (cell-new 1 1)
-                                              (cell-new 2 1)
-                                              (cell-new 3 1)
-                                              (cell-new 1 3)
-                                              (cell-new 2 3)
-                                              (cell-new 3 3)))
-                             (cell-new 2 2)))
-  )
+(test-many
+ '((assertEqual 0 (neighbours (new-world '())
+                              (cell-new 1 1)))
+   (assertEqual 1 (neighbours (new-world (list (cell-new 0 1)))
+                              (cell-new 1 1)))
+   (assertEqual 2 (neighbours (new-world (list (cell-new 1 1)
+                                               (cell-new 2 1)
+                                               (cell-new 3 1)))
+                              (cell-new 2 1)))
+   (assertEqual 1 (neighbours (new-world (list (cell-new 1 1)
+                                               (cell-new 2 1)
+                                               (cell-new 3 1)))
+                              (cell-new 1 1)))
+   (assertEqual 4 (neighbours (new-world (list (cell-new 1 1)
+                                               (cell-new 3 1)
+                                               (cell-new 1 3)
+                                               (cell-new 3 3)))
+                              (cell-new 2 2)))
+   (assertEqual 6 (neighbours (new-world (list (cell-new 1 1)
+                                               (cell-new 2 1)
+                                               (cell-new 3 1)
+                                               (cell-new 1 3)
+                                               (cell-new 2 3)
+                                               (cell-new 3 3)))
+                              (cell-new 2 2)))))
 
 ;; test alive
-(progn
-  (assertEqual nil
-               (alive (new-world '())
-                      (cell-new 0 0)))
-  (assertEqual t
-               (alive (new-world (list (cell-new 0 0)))
-                      (cell-new 0 0)))
-  (assertEqual nil
-               (alive (new-world (list (cell-new 0 0)))
-                      (cell-new 1 1)))
-  )
+(test-many
+ '((assertEqual nil
+                (alive (new-world '())
+                       (cell-new 0 0)))
+   (assertEqual t
+                (alive (new-world (list (cell-new 0 0)))
+                       (cell-new 0 0)))
+   (assertEqual nil
+                (alive (new-world (list (cell-new 0 0)))
+                       (cell-new 1 1)))))
 
 ;; test survives
-(progn
-  (assertEqual t
-               (survives (new-world (list (cell-new 1 1)
-                                          (cell-new 2 1)
-                                          (cell-new 3 1)))
-                         (cell-new 2 1)))
-  (assertEqual nil
-               (survives (new-world (list (cell-new 1 1)
-                                          (cell-new 2 1)))
-                         (cell-new 2 1)))
-  )
+(test-many
+ '((assertEqual t
+                (survives (new-world (list (cell-new 1 1)
+                                           (cell-new 2 1)
+                                           (cell-new 3 1)))
+                          (cell-new 2 1)))
+   (assertEqual nil
+                (survives (new-world (list (cell-new 1 1)
+                                           (cell-new 2 1)))
+                          (cell-new 2 1)))))
