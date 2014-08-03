@@ -7,18 +7,21 @@
 
 ;; return number of alive neighbours
 (defun neighbours (world cell)
+  (reduce '+ (mapcar (lambda (c) (if c 1 0))
+                     (mapcar (lambda (c) (alive world c))
+                             (neighbour-cells cell)))))
+
+(defun neighbour-cells (cell)
   (let ((x (cell-x cell))
         (y (cell-y cell)))
-    (reduce '+ (mapcar (lambda (c) (if c 1 0))
-                       (list
-                        (alive2 world (- x 1) (- y 1))
-                        (alive2 world    x    (- y 1))
-                        (alive2 world (+ x 1) (- y 1))
-                        (alive2 world (- x 1)    y)
-                        (alive2 world (+ x 1)    y)
-                        (alive2 world (- x 1) (+ y 1))
-                        (alive2 world    x    (+ y 1))
-                        (alive2 world (+ x 1) (+ y 1)))))))
+    (list (cell-new (- x 1) (- y 1))
+          (cell-new    x    (- y 1))
+          (cell-new (+ x 1) (- y 1))
+          (cell-new (- x 1)    y)
+          (cell-new (+ x 1)    y)
+          (cell-new (- x 1) (+ y 1))
+          (cell-new    x    (+ y 1))
+          (cell-new (+ x 1) (+ y 1)))))
 
 (defun cell-pos (cell)
   (plist-get cell 'pos))
