@@ -212,3 +212,36 @@
      (assertEqual nil (alive empty-from-two (cell-new 1 1)))
      (assertEqual 0 (hash-table-count empty-from-two))
      )))
+
+
+;; unused testing stuff
+
+(defun neighbour-cells (cx cy)
+  (flatten
+   (loop for x in (number-sequence (1- cx) (1+ cx))
+         collect (loop for y in (number-sequence (1- cy) (1+ cy))
+                       when (not (and (equal cx x)
+                                      (equal cy y)))
+                       collect (cons x y)))))
+
+(neighbour-cells 5 9)
+
+(defun flatten (lst)
+  "Flatten a list of lists with pairs, leave the pairs intact."
+  (cond ((null lst) '())
+        ((atom lst) (list lst))
+        ;; if it is a pair, don't try to flatten it
+        ((and (listp (car lst))
+              (not (listp (cdr (car lst)))))
+         (cons (car lst) (flatten (cdr lst))))
+        (t (append (flatten (car lst)) (flatten (cdr lst))))))
+
+(defun neighbour-cells (x y)
+  (list (cons (1- x) (1- y))
+        (cons     x  (1- y))
+        (cons (1+ x) (1- y))
+        (cons (1- x)     y)
+        (cons (1+ x)     y)
+        (cons (1- x) (1+ y))
+        (cons     x  (1+ y))
+        (cons (1+ x) (1+ y))))
